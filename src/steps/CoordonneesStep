@@ -1,0 +1,147 @@
+import React, { useState } from "react";
+
+export default function CoordonneesStep({ value, onChange, onNext, onBack }) {
+  const [sociosOpen, setSociosOpen] = useState(false);
+  const [consentCall, setConsentCall] = useState(false);
+  const [consentEmail, setConsentEmail] = useState(false);
+
+  const update = (patch) => onChange({ ...value, ...patch });
+
+  const canSubmit =
+    value?.prenom?.trim() &&
+    value?.nom?.trim() &&
+    value?.tel?.trim() &&
+    value?.email?.trim() &&
+    consentCall &&
+    consentEmail;
+
+  return (
+    <>
+      <div className="flex flex-col gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <input
+            className="input w-full"
+            placeholder="Nombre"
+            value={value.prenom}
+            onChange={(e) => update({ prenom: e.target.value })}
+          />
+          <input
+            className="input w-full"
+            placeholder="Apellidos"
+            value={value.nom}
+            onChange={(e) => update({ nom: e.target.value })}
+          />
+        </div>
+
+        <input
+          className="input w-full"
+          type="email"
+          placeholder="Email"
+          value={value.email}
+          onChange={(e) => update({ email: e.target.value })}
+        />
+
+        <input
+          className="input w-full"
+          type="tel"
+          placeholder="Teléfono"
+          value={value.tel}
+          onChange={(e) => update({ tel: e.target.value })}
+        />
+
+        {/* ✅ CHECKBOXES */}
+        <div className="mt-2 flex flex-col gap-4 text-sm text-[#0B2A3C]">
+          <label className="flex items-start gap-3">
+            <input
+              type="checkbox"
+              checked={consentCall}
+              onChange={(e) => setConsentCall(e.target.checked)}
+              className="mt-1 h-6 w-6 border-2 border-gray-500"
+            />
+            <span>
+              Al validar, usted autoriza expresamente a los{" "}
+              <button
+                type="button"
+                className="underline font-semibold"
+                onClick={() => setSociosOpen(true)}
+              >
+                socios
+              </button>{" "}
+              comerciales de WEEDEV SAS a ponerse en contacto con usted por teléfono con el fin de
+              presentarle ofertas de seguros de salud.
+            </span>
+          </label>
+
+          <label className="flex items-start gap-3">
+            <input
+              type="checkbox"
+              checked={consentEmail}
+              onChange={(e) => setConsentEmail(e.target.checked)}
+              className="mt-1 h-6 w-6 border-2 border-gray-500"
+            />
+            <span>
+              Usted acepta que WEEDEV SAS pueda ponerse en contacto con usted por correo electrónico,
+              SMS o WhatsApp con fines de prospección comercial para recibir otras ofertas
+              promocionales.
+            </span>
+          </label>
+        </div>
+
+        {/* ✅ BOUTONS */}
+        <div className="flex justify-between items-center mt-2">
+          <button type="button" onClick={onBack} className="underline text-sm">
+            ← Volver
+          </button>
+
+          <button
+            type="button"
+            onClick={onNext}
+            className="px-6 py-2 rounded-md bg-[#F7D877] font-bold"
+            disabled={!canSubmit}
+          >
+            Enviar
+          </button>
+        </div>
+      </div>
+
+      {/* ✅ POPUP "SOCIOS" */}
+      {sociosOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4"
+          onClick={() => setSociosOpen(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="font-bold text-lg mb-4">
+              Marcando esta casilla acepto la política de privacidad de:
+            </h3>
+
+            <div className="flex flex-col gap-4 text-sm">
+              {["Adeslas", "AXA", "Seguros Generales"].map((name) => (
+                <label key={name} className="flex items-start gap-3">
+                  <input type="checkbox" className="mt-1 h-6 w-6 border-2 border-gray-500" />
+                  <span>
+                    {name}. Más información acerca de la{" "}
+                    <span className="underline">política de privacidad</span>.
+                  </span>
+                </label>
+              ))}
+            </div>
+
+            <div className="mt-6 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setSociosOpen(false)}
+                className="px-4 py-2 rounded-md bg-gray-100 font-semibold"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}

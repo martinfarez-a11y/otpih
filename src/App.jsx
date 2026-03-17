@@ -20,6 +20,15 @@ function Card({ title, titleClassName = "", children }) {
 export default function App() {
   const [step, setStep] = useState(0);
   const [sociosOpen, setSociosOpen] = useState(false);
+  const [touched, setTouched] = useState({
+    zipcode: false,
+    email: false,
+    phone: false,
+  });
+  const [submitted, setSubmitted] = useState({
+    zipcode: false,
+    contact: false,
+  });
   const [formData, setFormData] = useState({
     age: null,
     insurer: null,
@@ -31,6 +40,35 @@ export default function App() {
     consentPhone: false,
     consentMarketing: false,
   });
+
+  const validateSpanishZip = (raw) => {
+    const s = String(raw ?? "").trim();
+    if (!/^\d{5}$/.test(s)) return false;
+    const n = Number.parseInt(s, 10);
+    return n >= 1001 && n <= 52999; // 01001 -> 1001, 52999 -> 52999
+  };
+
+  const normalizeSpanishPhone = (raw) => {
+    const s = String(raw ?? "").trim().replace(/[()\s.-]/g, "");
+    if (s.startsWith("+34")) return s.slice(3);
+    if (s.startsWith("0034")) return s.slice(4);
+    return s;
+  };
+
+  const validateSpanishPhone = (raw) => {
+    const n = normalizeSpanishPhone(raw);
+    if (!/^\d{9}$/.test(n)) return false;
+    return /^[6789]\d{8}$/.test(n);
+  };
+
+  const validateEmail = (raw) => {
+    const s = String(raw ?? "").trim();
+    return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(s);
+  };
+
+  const zipIsValid = validateSpanishZip(formData.zipcode);
+  const phoneIsValid = validateSpanishPhone(formData.phone);
+  const emailIsValid = validateEmail(formData.email);
 
   const goNext = () => setStep((s) => s + 1);
   const goBack = () => setStep((s) => Math.max(0, s - 1));
@@ -63,13 +101,15 @@ export default function App() {
   };
 
   const submitZip = () => {
-    if (!/^\d{5}$/.test(formData.zipcode.trim())) return;
+    setSubmitted((s) => ({ ...s, zipcode: true }));
+    if (!validateSpanishZip(formData.zipcode)) return;
     setStep(3);
   };
 
   const submitContact = () => {
     // validation light pour démo
-    if (!formData.email || !formData.phone) return;
+    setSubmitted((s) => ({ ...s, contact: true }));
+    if (!validateEmail(formData.email) || !validateSpanishPhone(formData.phone)) return;
     setStep(4); // loading
   };
 
@@ -171,7 +211,11 @@ export default function App() {
                     placeholder="Ej: 28001"
                     value={formData.zipcode}
                     onChange={(e) => setFormData((d) => ({ ...d, zipcode: e.target.value }))}
+                    onBlur={() => setTouched((t) => ({ ...t, zipcode: true }))}
                   />
+                  {(touched.zipcode || submitted.zipcode) && !zipIsValid && (
+                    <p className="text-red-600 text-xs -mt-2">Introduce un código postal válido</p>
+                  )}
 
                   <div className="flex justify-between items-center">
                     <button type="button" onClick={goBack} className="underline text-sm text-black">
@@ -182,7 +226,7 @@ export default function App() {
                       type="button"
                       onClick={submitZip}
                       className="px-6 py-2 rounded-md bg-[#F7D877] font-bold text-black"
-                      disabled={!/^\d{5}$/.test(formData.zipcode.trim())}
+                      disabled={!zipIsValid}
                     >
                       Continuar
                     </button>
@@ -215,7 +259,11 @@ export default function App() {
                     placeholder="Email"
                     value={formData.email}
                     onChange={(e) => setFormData((d) => ({ ...d, email: e.target.value }))}
+                    onBlur={() => setTouched((t) => ({ ...t, email: true }))}
                   />
+                  {(touched.email || submitted.contact) && !emailIsValid && (
+                    <p className="text-red-600 text-xs -mt-2">Introduce un email válido</p>
+                  )}
 
                   <input
                     className="input w-full border-2 border-black !text-black"
@@ -223,7 +271,11 @@ export default function App() {
                     placeholder="Teléfono"
                     value={formData.phone}
                     onChange={(e) => setFormData((d) => ({ ...d, phone: e.target.value }))}
+                    onBlur={() => setTouched((t) => ({ ...t, phone: true }))}
                   />
+                  {(touched.phone || submitted.contact) && !phoneIsValid && (
+                    <p className="text-red-600 text-xs -mt-2">Introduce un teléfono válido</p>
+                  )}
 
                   <div className="flex flex-col gap-3 text-sm text-black">
                     <label className="flex gap-3 items-start cursor-pointer">
@@ -280,7 +332,7 @@ export default function App() {
                       type="button"
                       onClick={submitContact}
                       className="px-6 py-2 rounded-md bg-[#F7D877] font-bold text-black"
-                      disabled={!formData.email || !formData.phone}
+                      disabled={!formData.email || !formData.phone || !emailIsValid || !phoneIsValid}
                     >
                       Enviar
                     </button>

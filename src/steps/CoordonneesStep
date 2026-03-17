@@ -4,14 +4,39 @@ export default function CoordonneesStep({ value, onChange, onNext, onBack }) {
   const [sociosOpen, setSociosOpen] = useState(false);
   const [consentCall, setConsentCall] = useState(false);
   const [consentEmail, setConsentEmail] = useState(false);
+  const [touched, setTouched] = useState({ email: false, tel: false });
+  const [submitted, setSubmitted] = useState(false);
 
   const update = (patch) => onChange({ ...value, ...patch });
+
+  const normalizeSpanishPhone = (raw) => {
+    const s = String(raw ?? "").trim().replace(/[()\s.-]/g, "");
+    if (s.startsWith("+34")) return s.slice(3);
+    if (s.startsWith("0034")) return s.slice(4);
+    return s;
+  };
+
+  const validateSpanishPhone = (raw) => {
+    const n = normalizeSpanishPhone(raw);
+    if (!/^\d{9}$/.test(n)) return false;
+    return /^[6789]\d{8}$/.test(n);
+  };
+
+  const validateEmail = (raw) => {
+    const s = String(raw ?? "").trim();
+    return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(s);
+  };
+
+  const telIsValid = validateSpanishPhone(value?.tel);
+  const emailIsValid = validateEmail(value?.email);
 
   const canSubmit =
     value?.prenom?.trim() &&
     value?.nom?.trim() &&
     value?.tel?.trim() &&
     value?.email?.trim() &&
+    telIsValid &&
+    emailIsValid &&
     consentCall &&
     consentEmail;
 
@@ -39,7 +64,11 @@ export default function CoordonneesStep({ value, onChange, onNext, onBack }) {
           placeholder="Email"
           value={value.email}
           onChange={(e) => update({ email: e.target.value })}
+          onBlur={() => setTouched((t) => ({ ...t, email: true }))}
         />
+        {(touched.email || submitted) && !emailIsValid && (
+          <p className="text-red-600 text-xs -mt-2">Introduce un email válido</p>
+        )}
 
         <input
           className="input w-full"
@@ -47,7 +76,11 @@ export default function CoordonneesStep({ value, onChange, onNext, onBack }) {
           placeholder="Teléfono"
           value={value.tel}
           onChange={(e) => update({ tel: e.target.value })}
+          onBlur={() => setTouched((t) => ({ ...t, tel: true }))}
         />
+        {(touched.tel || submitted) && !telIsValid && (
+          <p className="text-red-600 text-xs -mt-2">Introduce un teléfono válido</p>
+        )}
 
         {/* ✅ CHECKBOXES */}
         <div className="mt-2 flex flex-col gap-4 text-sm text-[#0B2A3C]">
@@ -95,7 +128,11 @@ export default function CoordonneesStep({ value, onChange, onNext, onBack }) {
 
           <button
             type="button"
-            onClick={onNext}
+            onClick={() => {
+              setSubmitted(true);
+              if (!canSubmit) return;
+              onNext();
+            }}
             className="px-6 py-2 rounded-md bg-[#F7D877] font-bold"
             disabled={!canSubmit}
           >

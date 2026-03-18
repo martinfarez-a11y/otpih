@@ -156,12 +156,34 @@ export default function CoordonneesStep({ value, onChange, onNext, onBack }) {
             </h3>
 
             <div className="flex flex-col gap-4 text-sm">
-              {["Adeslas", "AXA", "Seguros Generales"].map((name) => (
+              {[
+                {
+                  name: "Adeslas",
+                  href: "https://www.segurcaixaadeslas.es/proteccion-de-datos",
+                },
+                {
+                  name: "AXA",
+                  href: "https://www.axa.es/acerca-axa/enlaces-politica-de-privacidad",
+                },
+              ].map(({ name, href }) => (
                 <label key={name} className="flex items-start gap-3">
-                  <input type="checkbox" className="mt-1 h-6 w-6 border-2 border-gray-500" />
+                  <input
+                    type="checkbox"
+                    className="mt-1 h-6 w-6 border-2 border-gray-500"
+                    checked={consentCall}
+                    readOnly
+                  />
                   <span>
                     {name}. Más información acerca de la{" "}
-                    <span className="underline">política de privacidad</span>.
+                    <a
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline text-blue-600"
+                    >
+                      política de privacidad
+                    </a>
+                    .
                   </span>
                 </label>
               ))}

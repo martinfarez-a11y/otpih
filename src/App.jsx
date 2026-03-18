@@ -21,6 +21,7 @@ function Card({ title, titleClassName = "", children }) {
 export default function App() {
   const [step, setStep] = useState(0);
   const [sociosOpen, setSociosOpen] = useState(false);
+  const [tooOld, setTooOld] = useState(false);
   const [touched, setTouched] = useState({
     zipcode: false,
     email: false,
@@ -93,7 +94,13 @@ export default function App() {
 
   const pickAge = (value) => {
     setFormData((d) => ({ ...d, age: value }));
-    setStep(1);
+    if (value === "gt65") {
+      setTooOld(true);
+      setStep(5);
+    } else {
+      setTooOld(false);
+      setStep(1);
+    }
   };
 
   const pickInsurer = (value) => {
@@ -373,15 +380,34 @@ export default function App() {
 
                       <div className="px-6 py-6">
                         <div className="flex flex-col gap-6 text-base text-black">
-                          {["Adeslas", "AXA", "Seguros Generales"].map((name) => (
+                          {[
+                            {
+                              name: "Adeslas",
+                              href: "https://www.segurcaixaadeslas.es/proteccion-de-datos",
+                            },
+                            {
+                              name: "AXA",
+                              href: "https://www.axa.es/acerca-axa/enlaces-politica-de-privacidad",
+                            },
+                          ].map(({ name, href }) => (
                             <label key={name} className="flex items-start gap-4">
                               <input
                                 type="checkbox"
                                 className="mt-1 h-5 w-5 border-2 border-black bg-white rounded-sm shrink-0"
+                                checked={formData.consentPhone}
+                                readOnly
                               />
                               <span>
                                 {name}. Más información acerca de la{" "}
-                                <span className="underline">política de privacidad</span>.
+                                <a
+                                  href={href}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="underline text-blue-600"
+                                >
+                                  política de privacidad
+                                </a>
+                                .
                               </span>
                             </label>
                           ))}
@@ -404,6 +430,7 @@ export default function App() {
 
             {step === 5 && (
               <TYPStep
+                tooOld={tooOld}
                 consentPhone={formData.consentPhone}
                 consentMarketing={formData.consentMarketing}
               />

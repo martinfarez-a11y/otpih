@@ -1,9 +1,15 @@
 import React from "react";
 
-export default function TYPStep({ consentPhone, consentMarketing }) {
-  const showAdeslas = consentPhone === true;
-  const showGeneric = consentPhone === false && consentMarketing === true;
-  const showNoOffer = consentPhone === false && consentMarketing === false;
+export default function TYPStep({ tooOld, consentPhone, consentMarketing }) {
+  let showAdeslas = consentPhone === true;
+  let showGeneric = consentPhone === false && consentMarketing === true;
+  let showNoOffer = consentPhone === false && consentMarketing === false;
+
+  if (tooOld) {
+    showAdeslas = false;
+    showGeneric = false;
+    showNoOffer = true;
+  }
 
   return (
     <div className="w-full bg-white">

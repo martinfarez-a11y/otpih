@@ -2,7 +2,8 @@ import React, { useState } from "react";
 
 export default function CoordonneesStep({ value, onChange, onNext, onBack }) {
   const [sociosOpen, setSociosOpen] = useState(false);
-  const [consentCall, setConsentCall] = useState(false);
+  const [sociosAdeslas, setSociosAdeslas] = useState(false);
+  const [sociosAxa, setSociosAxa] = useState(false);
   const [consentEmail, setConsentEmail] = useState(false);
   const [touched, setTouched] = useState({ email: false, tel: false });
   const [submitted, setSubmitted] = useState(false);
@@ -29,6 +30,7 @@ export default function CoordonneesStep({ value, onChange, onNext, onBack }) {
 
   const telIsValid = validateSpanishPhone(value?.tel);
   const emailIsValid = validateEmail(value?.email);
+  const consentCall = sociosAdeslas || sociosAxa;
 
   const canSubmit =
     value?.prenom?.trim() &&
@@ -88,7 +90,11 @@ export default function CoordonneesStep({ value, onChange, onNext, onBack }) {
             <input
               type="checkbox"
               checked={consentCall}
-              onChange={(e) => setConsentCall(e.target.checked)}
+              onChange={(e) => {
+                const checked = e.target.checked;
+                setSociosAdeslas(checked);
+                setSociosAxa(checked);
+              }}
               className="mt-1 h-6 w-6 border-2 border-gray-500"
             />
             <span>
@@ -158,35 +164,44 @@ export default function CoordonneesStep({ value, onChange, onNext, onBack }) {
             <div className="flex flex-col gap-4 text-sm">
               {[
                 {
-                  name: "Adeslas",
+                  key: "sociosAdeslas",
+                  label: "Adeslas",
                   href: "https://www.segurcaixaadeslas.es/proteccion-de-datos",
                 },
                 {
-                  name: "AXA",
+                  key: "sociosAxa",
+                  label: "AXA",
                   href: "https://www.axa.es/acerca-axa/enlaces-politica-de-privacidad",
                 },
-              ].map(({ name, href }) => (
-                <label key={name} className="flex items-start gap-3">
-                  <input
-                    type="checkbox"
-                    className="mt-1 h-6 w-6 border-2 border-gray-500"
-                    checked={consentCall}
-                    readOnly
-                  />
-                  <span>
-                    {name}. Más información acerca de la{" "}
-                    <a
-                      href={href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="underline text-blue-600"
-                    >
-                      política de privacidad
-                    </a>
-                    .
-                  </span>
-                </label>
-              ))}
+              ].map(({ key, label, href }) => {
+                const checked = key === "sociosAdeslas" ? sociosAdeslas : sociosAxa;
+                const setFn = key === "sociosAdeslas" ? setSociosAdeslas : setSociosAxa;
+                return (
+                  <label key={key} className="flex items-start gap-3">
+                    <input
+                      type="checkbox"
+                      className="mt-1 h-6 w-6 border-2 border-gray-500"
+                      checked={checked}
+                      onChange={(e) => {
+                        const next = e.target.checked;
+                        setFn(next);
+                      }}
+                    />
+                    <span>
+                      {label}. Más información acerca de la{" "}
+                      <a
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline text-blue-600"
+                      >
+                        política de privacidad
+                      </a>
+                      .
+                    </span>
+                  </label>
+                );
+              })}
             </div>
 
             <div className="mt-6 flex justify-end">

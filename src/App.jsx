@@ -39,6 +39,8 @@ export default function App() {
     lastName: "",
     email: "",
     phone: "",
+    sociosAdeslas: false,
+    sociosAxa: false,
     consentPhone: false,
     consentMarketing: false,
   });
@@ -71,6 +73,8 @@ export default function App() {
   const zipIsValid = validateSpanishZip(formData.zipcode);
   const phoneIsValid = validateSpanishPhone(formData.phone);
   const emailIsValid = validateEmail(formData.email);
+
+  const consentPhoneComputed = formData.sociosAdeslas || formData.sociosAxa;
 
   const goNext = () => setStep((s) => s + 1);
   const goBack = () => setStep((s) => Math.max(0, s - 1));
@@ -289,8 +293,18 @@ export default function App() {
                     <label className="flex gap-3 items-start cursor-pointer">
                       <input
                         type="checkbox"
-                        checked={formData.consentPhone}
-                        onChange={(e) => setFormData((d) => ({ ...d, consentPhone: e.target.checked }))}
+                        checked={consentPhoneComputed}
+                        onChange={(e) =>
+                          setFormData((d) => {
+                            const checked = e.target.checked;
+                            return {
+                              ...d,
+                              sociosAdeslas: checked,
+                              sociosAxa: checked,
+                              consentPhone: checked,
+                            };
+                          })
+                        }
                         className="mt-1 h-4 w-4 border-2 border-black bg-white rounded shrink-0"
                       />
                       <span>
@@ -382,23 +396,31 @@ export default function App() {
                         <div className="flex flex-col gap-6 text-base text-black">
                           {[
                             {
-                              name: "Adeslas",
+                              key: "sociosAdeslas",
+                              label: "Adeslas",
                               href: "https://www.segurcaixaadeslas.es/proteccion-de-datos",
                             },
                             {
-                              name: "AXA",
+                              key: "sociosAxa",
+                              label: "AXA",
                               href: "https://www.axa.es/acerca-axa/enlaces-politica-de-privacidad",
                             },
-                          ].map(({ name, href }) => (
-                            <label key={name} className="flex items-start gap-4">
+                          ].map(({ key, label, href }) => (
+                            <label key={key} className="flex items-start gap-4">
                               <input
                                 type="checkbox"
                                 className="mt-1 h-5 w-5 border-2 border-black bg-white rounded-sm shrink-0"
-                                checked={formData.consentPhone}
-                                readOnly
+                                checked={formData[key]}
+                                onChange={(e) =>
+                                  setFormData((d) => {
+                                    const next = { ...d, [key]: e.target.checked };
+                                    const consentPhone = next.sociosAdeslas || next.sociosAxa;
+                                    return { ...next, consentPhone };
+                                  })
+                                }
                               />
                               <span>
-                                {name}. Más información acerca de la{" "}
+                                {label}. Más información acerca de la{" "}
                                 <a
                                   href={href}
                                   target="_blank"
@@ -431,8 +453,10 @@ export default function App() {
             {step === 5 && (
               <TYPStep
                 tooOld={tooOld}
-                consentPhone={formData.consentPhone}
+                consentPhone={consentPhoneComputed}
                 consentMarketing={formData.consentMarketing}
+                sociosAdeslas={formData.sociosAdeslas}
+                sociosAxa={formData.sociosAxa}
               />
             )}
 

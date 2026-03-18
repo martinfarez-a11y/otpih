@@ -1,9 +1,12 @@
 import React from "react";
 
-export default function TYPStep({ tooOld, consentPhone, consentMarketing }) {
-  let showAdeslas = consentPhone === true;
-  let showGeneric = consentPhone === false && consentMarketing === true;
-  let showNoOffer = consentPhone === false && consentMarketing === false;
+export default function TYPStep({ tooOld, consentPhone, consentMarketing, sociosAdeslas, sociosAxa }) {
+  let showAdeslas = consentPhone === true && sociosAdeslas === true;
+  let showGeneric =
+    !tooOld &&
+    !showAdeslas &&
+    (consentMarketing === true || sociosAxa === true || consentPhone === true);
+  let showNoOffer = !tooOld && !showAdeslas && !showGeneric;
 
   if (tooOld) {
     showAdeslas = false;

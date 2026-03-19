@@ -28,7 +28,7 @@ export default function TYPStep({ tooOld, consentPhone, consentMarketing, socios
 
             <div className="mt-14 flex flex-wrap items-center justify-center gap-12">
               <img
-                src={`${import.meta.env.BASE_URL}oferta-seguro-salud/adeslas.png`}
+                src={`${import.meta.env.BASE_URL}oferta-seguro/adeslas.png`}
                 alt="Adeslas"
                 className="w-[420px] max-w-[85vw]"
               />
